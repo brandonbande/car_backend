@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" 
+          content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer</title>
+</head>
+
+<body>
+    <h1> GFG Image Resizer</h1>
+    <form id="uploadForm"
+          action="/upload"
+          method="post"
+          enctype="multipart/form-data">
+        <input type="file"
+               name="image"
+               id="imageInput"
+               accept="image/*">
+        <button type="submit"
+                id="uploadBtn">Upload</button>
+    </form>
+    <div id="uploadInfo"></div>
+    <button id="resizeBtn" style="display:none;">Resize</button>
+    <div id="resizedImage"></div>
+
+    <script>
+        document
+        .getElementById('uploadForm')
+        .addEventListener('submit', function (event) {
+            event
+            .preventDefault();
+            var formData = new FormData(this);
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(data => {
+                    document
+                    .getElementById('uploadInfo')
+                    .innerText = data;
+                    document
+                    .getElementById('resizeBtn')
+                    .style
+                    .display = 'block';
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        document
+        .getElementById('resizeBtn')
+        .addEventListener('click', function () {
+            fetch('/resize', {
+                method: 'POST',
+                body: new FormData(document.getElementById('uploadForm'))
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.blob();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(blob => {
+                    const url = window
+                    .URL
+                    .createObjectURL(blob);
+                    const link = document
+                    .createElement('a');
+                    link.href = url;
+                    link.download = 'resized_image.jpg';
+                    link.innerText = 'Download Resized Image';
+                    document
+                    .getElementById('resizedImage')
+                    .appendChild(link);
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+
+</html>
